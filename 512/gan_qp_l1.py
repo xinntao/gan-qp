@@ -17,7 +17,7 @@ if not os.path.exists('samples'):
     os.mkdir('samples')
 
 
-imgs = glob.glob('../../../data/celebahq/CelebA-HQ/train/*.png')
+imgs = glob.glob('/mnt/SSD/xtwang/CelebA_attr/train_512/all_512/*.png')
 np.random.shuffle(imgs)
 img_dim = 512
 z_dim = 128
@@ -242,22 +242,22 @@ if __name__ == '__main__':
     Z = np.random.randn(n_size**2, z_dim)
     logs = {'fid': [], 'best': 1000}
 
-    print u'初始化FID评估器...'
+    print(u'初始化FID评估器...')
     fid_evaluator = FID(img_generator(imgs, 'fid', batch_size), True)
 
     for i in range(total_iter):
         for j in range(2):
-            x_sample = img_data.next()
+            x_sample = next(img_data)
             z_sample = np.random.randn(len(x_sample), z_dim)
             d_loss = d_train_model.train_on_batch(
                 [x_sample, z_sample], None)
         for j in range(1):
-            x_sample = img_data.next()
+            x_sample = next(img_data)
             z_sample = np.random.randn(len(x_sample), z_dim)
             g_loss = g_train_model.train_on_batch(
                 [x_sample, z_sample], None)
         if i % 10 == 0:
-            print 'iter: %s, d_loss: %s, g_loss: %s' % (i, d_loss, g_loss)
+            print('iter: %s, d_loss: %s, g_loss: %s' % (i, d_loss, g_loss))
         if i % iters_per_sample == 0:
             sample('samples/test_%s.png' % i, n_size, Z)
             g_train_model.save_weights('./g_train_model.weights')
@@ -276,6 +276,6 @@ if __name__ == '__main__':
                 logs['best'] = fid
                 g_train_model.save_weights('./g_train_model.best.weights')
             json.dump(logs, open('logs.txt', 'w'), indent=4)
-            print 'iter: %s, fid: %s, best: %s' % (i, fid, logs['best'])
+            print('iter: %s, fid: %s, best: %s' % (i, fid, logs['best']))
         if i > 10000:
             fid_per_sample = 100
